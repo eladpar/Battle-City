@@ -1,0 +1,102 @@
+/// (c) Technion IIT, Department of Electrical Engineering 2019 
+//-- This module is dividing the 50MHz CLOCK OSC, and sends clock
+//-- enable it to the appropriate outputs in order to achieve
+//-- operation at slower rate of individual modules (this is done
+//-- to keep the whole system globally synchronous).
+//-- All DACs output are set to 100 KHz. 
+
+//-- Elad Paritzky Oct 2019
+
+// SystemVerilog version Elad Paritzky Oct 2019
+
+module	game_controller	(	
+
+//		--////////////////////	Clock Input	 	////////////////////	
+					input		logic	clk,
+					input		logic	resetN,
+					input		logic	death1,// signals one bit pulse when tank 1 loses a life
+					input		logic	death2,// signals one bit pulse when tank 2 loses a life
+					input		logic	more_gold1,// signals one bit pulse when tank 1 "takes" (collison) gold
+					input		logic	more_gold2,// signals one bit pulse when tank 2 "takes" (collison) gold
+					input		logic	more_life1,// signals one bit pulse when tank 1 "takes" (collison) life prize
+					input		logic	more_life2,// signals one bit pulse when tank 2 "takes" (collison) life prize
+					output logic [1:0] numOfDeath1, // vector assigned for counting death number tank 1
+					output logic [1:0] numOfDeath2,// vector assigned for counting death number tank 2
+					output logic [2:0] numOfgold1,// vector assigned for counting gold number tank 2
+					output logic [2:0] numOfgold2// vector assigned for counting gold number tank 1
+
+		);
+
+logic [1:0] deathcounter1;
+logic [1:0] deathcounter2;
+logic [2:0] goldcounter1;
+logic [2:0] goldcounter2;
+logic tmp_death1;
+logic tmp_death2;
+logic tmp_life1;
+logic tmp_life2;
+logic tmp_gold1;
+logic tmp_gold2;
+always_ff@(posedge clk or negedge resetN)
+begin
+	if(!resetN)
+		begin
+		//deafult values 
+				deathcounter1 <= 2'd0;
+				deathcounter2 <= 2'd0;
+				tmp_death1 <= 1'b0;
+				tmp_death2 <= 1'b0;
+				tmp_life1 <= 1'b0;
+				tmp_life2 <= 1'b0;
+				goldcounter1 <= 3'd0;
+				goldcounter2 <= 3'd0;
+				tmp_gold1 <= 1'b0;
+				tmp_gold2 <= 1'b0;
+		end
+	
+	else
+		begin
+		//deafult values 
+				deathcounter1<= deathcounter1;
+				tmp_death1 <= 1'b0;
+				tmp_life1 <= 1'b0;
+				deathcounter2<= deathcounter2;
+				tmp_death2 <= 1'b0;
+				tmp_life2 <= 1'b0;
+				goldcounter1<= goldcounter1;
+				tmp_gold1 <= 1'b0;
+				goldcounter2 <= goldcounter2;
+				tmp_gold2 <= 1'b0;
+				if ((death1) && (~tmp_death1))begin
+					deathcounter1 <= deathcounter1+1'd1;
+					tmp_death1 <= 1'b1;
+				end
+				//tmp flags are raised to avoid multiple coliisions 
+				if ((more_life1) && (~tmp_life1)&&(deathcounter1 != 2'd0))begin
+					deathcounter1 <= deathcounter1-1'd1;
+					tmp_life1 <= 1'b1;
+				end
+				if ((death2) && (~tmp_death2))begin
+					deathcounter2 <= deathcounter2+1'd1;
+					tmp_death2 <= 1'b1;
+				end
+				if ((more_life2) && (~tmp_life2)&&(deathcounter1 != 2'd0))begin
+					deathcounter2 <= deathcounter2-1'd1;
+					tmp_life2 <= 1'b1;
+				end
+				if ((more_gold1) && (~tmp_gold1))begin
+					goldcounter1 <= goldcounter1+1'd1;
+					tmp_gold1 <= 1'b1;
+				end	
+				if ((more_gold2) && (~tmp_gold2))begin
+					goldcounter2 <= goldcounter2+1'd1;
+					tmp_gold2 <= 1'b1;
+				end
+				
+		end
+end
+assign numOfDeath1 = deathcounter1;
+assign numOfDeath2 = deathcounter2;
+assign numOfgold1 = goldcounter1;
+assign numOfgold2 = goldcounter2;
+endmodule

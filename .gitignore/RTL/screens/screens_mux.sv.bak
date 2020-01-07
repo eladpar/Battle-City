@@ -1,0 +1,75 @@
+//-- Elad Paritzky Dec 2019
+module	screens_mux	(
+//		--------	Clock Input		
+					input  		logic initial_screen,
+					input  		logic green_screen,
+					input  		logic yellow_screen,
+					input		logic	initialDrawingRequest, // two set of inputs per unit
+					input		logic	[7:0] initialRGB, 
+					input		logic	yellowDrawingRequest, // two set of inputs per unit
+					input		logic	[7:0] yellowRGB, 
+					input		logic	greenDrawingRequest, // two set of inputs per unit
+					input		logic	[7:0] greenRGB, 
+					
+					output	logic	[7:0] RGBOut,
+					output logic screenDrawingRequest,
+					output logic [1:0] test
+					);
+logic [7:0] tmpRGB;
+logic screenDrawingRequest_d;
+//logic [1:0]test;
+
+//======--------------------------------------------------------------------------------------------------------------=
+always_comb begin
+
+	if (initial_screen == 1'b1 ) begin 
+			test = 2'd1;
+			RGBOut = initialRGB;
+			screenDrawingRequest = initialDrawingRequest;
+		end
+	else if (green_screen == 1'b1 ) begin
+			test = 2'd2;	
+			RGBOut = greenRGB;
+			screenDrawingRequest = greenDrawingRequest;
+		end
+	else if (yellow_screen == 1'b1 ) begin 
+			test = 2'd3;
+			RGBOut = yellowRGB;
+			screenDrawingRequest = yellowDrawingRequest;
+		end
+	else begin  
+			test = 2'd0;
+			RGBOut = initialRGB;
+			screenDrawingRequest = 1'b0;
+		end 
+ 
+end
+/*
+always_ff@(posedge clk or negedge resetN)
+begin
+	if(!resetN) begin
+			tmpRGB	<= 8'b0;
+			screenDrawingRequest <= 1'b0;
+	end
+	else begin
+	screenDrawingRequest <= 1'b0;
+	if (initial_screen == 1'b1 ) begin  
+			tmpRGB <= initialRGB;
+			screenDrawingRequest_d <= initialDrawingRequest;
+		end
+	if (green_screen == 1'b1 ) begin  
+			tmpRGB <= greenRGB;
+			screenDrawingRequest_d <= greenDrawingRequest;
+		end
+	if (yellow_screen == 1'b1 ) begin  
+			tmpRGB <= yellowRGB;
+			screenDrawingRequest_d <= yellowDrawingRequest;
+		end
+	end ; 
+	
+end
+assign RGBOut = tmpRGB;
+assign screenDrawingRequest = screenDrawingRequest_d;*/
+endmodule
+
+
